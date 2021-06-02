@@ -39,3 +39,14 @@ elif [ "$output" == "$servstat2" ]; then
 	upload_to_s3
 fi
 done
+
+#add cron to instance if not present
+OUTPUT=$(crontab -l)
+if echo "$OUTPUT" | grep -q "/root/Automation_Project/automation.sh"; then
+	echo "Cron present"
+else
+	crontab -l > crontab_new
+	echo "5 * * * * /root/Automation_Project/automation.sh" >> crontab_new
+	crontab crontab_new
+	rm crontab_new
+fi

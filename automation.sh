@@ -27,7 +27,6 @@ else
 fi
 
 #Check status of service and enable id not running
-
 service $serv status | grep -i 'running\|inactive\|dead\|stopped' | awk '{print $3}' | while read output;
 do
 echo $output
@@ -39,14 +38,26 @@ elif [ "$output" == "$servstat2" ]; then
 	upload_to_s3
 fi
 done
+size=$(du -s -h /tmp/$myname-httpd-logs-$timestamp.tar | awk '{print $1}')
+FILE=/var/www/html/inventory.html
+if test -f "$FILE"; then
+        echo "$FILE exists."
+        sed -i "`wc -l < /var/www/html/inventory.html`i\\<p>httpd-logs&emsp;$timestamp&emsp;logs&emsp;$size</p>\\" /var/www/html/inventory.html
+else
+        echo "<!DOCTYPE html>" > $FILE
+        echo "<html><body><h1>Inventory File</h1>" >> $FILE
+        echo "<p>Log Type  &emsp;Date Created   &emsp;Type&emsp;Size</p>" >> $FILE
+        echo "<p>httpd-logs&emsp;$timestamp&emsp;logs&emsp;$size</p>" >> $FILE 
+        echo "</body></html>" >> $FILE
+        echo "$FILE created"
+fi
+
+
 
 #add cron to instance if not present
-OUTPUT=$(crontab -l)
-if echo "$OUTPUT" | grep -q "/root/Automation_Project/automation.sh"; then
+cronlist=/etc/cron.d/automation
+if test -f "$cronlist"; then # | grep -q "/root/Automation_Project/automation.sh"; then
 	echo "Cron present"
 else
-	crontab -l > crontab_new
-	echo "5 * * * * /root/Automation_Project/automation.sh" >> crontab_new
-	crontab crontab_new
-	rm crontab_new
+	echo "* * * * * /root/Automation_Project/automation.sh" > /etc/cron.d/automation
 fi

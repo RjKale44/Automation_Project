@@ -20,10 +20,10 @@ timestamp=$(date '+%d%m%Y-%H%M%S')
 apache=$(dpkg --get-selections | grep apache | awk '{print $1}' | head -1)
 if [[ $apache == "apache2" ]]; 
 then
-       echo "apache is installed"
+        echo
 else
-	echo "apache not installed"	
-	sudo apt install apache2
+	echo "$serv not installed , Installing apache2"	
+	sudo apt install $serv
 fi
 
 #Check status of service and enable id not running
@@ -35,7 +35,7 @@ if [ "$output" == "$servstat1" ]; then
 	service $serv start
     	echo "$serv service is UP now.!" 
 elif [ "$output" == "$servstat2" ]; then
-	echo "$serv is running"	
+	echo "$serv is running and logs are uploaded to S3 bucket $s3_bucket"	
 	upload_to_s3
 fi
 done

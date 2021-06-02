@@ -23,7 +23,7 @@ then
         echo
 else
 	echo "$serv not installed , Installing apache2"	
-	sudo apt install $serv
+	sudo apt install $serv -y
 fi
 
 #Check status of service and enable id not running
